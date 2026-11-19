@@ -1,0 +1,41 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "tiendaDiscos/1.0.0": {
+        "dependencies": {
+          "MySqlConnector": "3.0.0-beta.1"
+        },
+        "runtime": {
+          "tiendaDiscos.dll": {}
+        }
+      },
+      "MySqlConnector/3.0.0-beta.1": {
+        "runtime": {
+          "lib/net10.0/MySqlConnector.dll": {
+            "assemblyVersion": "3.0.0.0",
+            "fileVersion": "3.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "tiendaDiscos/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "MySqlConnector/3.0.0-beta.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Udtpc3HnxlfqhJSCryhmtat1KhqAe/JaatnOt2NWYGe+v19ArKBjjCNNYVEK0V+8OuSgAusar+XInYrjl9dpmQ==",
+      "path": "mysqlconnector/3.0.0-beta.1",
+      "hashPath": "mysqlconnector.3.0.0-beta.1.nupkg.sha512"
+    }
+  }
+}

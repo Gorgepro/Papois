@@ -1,0 +1,136 @@
+@model tiendaDiscos.Models.InventarioViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inventario - Papois Vinyl</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 28px; background: #E3DDD3; color: #292e2c; font-family: Arial, sans-serif; }
+        main { max-width: 1200px; margin: auto; }
+        header, .menu, .resumen, .busqueda, .formularios { display: flex; align-items: center; gap: 12px; }
+        header { justify-content: space-between; margin-bottom: 20px; }
+        .menu { margin-bottom: 20px; }
+        .menu a, button, .boton { padding: 10px 14px; border: 0; border-radius: 6px; background: #701705; color: white; cursor: pointer; text-decoration: none; font: inherit; }
+        .menu a:hover, button:hover, .boton:hover { background: #501004; }
+        .acciones { display: flex; align-items: center; gap: 8px; }
+        .acciones a { color: #405b4f; }
+        .tarjeta, .panel, .tabla { padding: 18px; background: white; border: 1px solid #ddd; border-radius: 10px; }
+        .resumen { margin-bottom: 20px; }
+        .tarjeta { flex: 1; }
+        .tarjeta p { margin-bottom: 0; font-size: 1.3rem; }
+        .formularios { align-items: stretch; margin-bottom: 20px; }
+        .panel { flex: 1; }
+        form { display: flex; gap: 8px; align-items: center; }
+        input, select { min-width: 0; padding: 9px; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
+        .busqueda { margin-bottom: 16px; }
+        .busqueda input { flex: 1; }
+        .tabla { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 750px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+        .alerta { margin: 12px 0; padding: 12px; border-radius: 6px; background: #e8f1eb; }
+        .error { background: #f8e6e5; color: #812c29; }
+        @@media (max-width: 700px) {
+            body { padding: 14px; }
+            header, .resumen, .formularios, .busqueda, .menu { align-items: stretch; flex-direction: column; }
+            form { align-items: stretch; flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <header>
+        <h1>Inventario</h1>
+        <a class="boton" asp-controller="Inventario" asp-action="Create">Agregar producto</a>
+    </header>
+    @await Html.PartialAsync("_AdminMenu")
+
+    @if (TempData["Mensaje"] is string mensaje)
+    {
+        <p class="alerta">@mensaje</p>
+    }
+    @if (TempData["Error"] is string error)
+    {
+        <p class="alerta error">@error</p>
+    }
+
+    <section class="resumen">
+        <div class="tarjeta">Productos<p><strong>@Model.TotalProductos</strong></p></div>
+        <div class="tarjeta">Unidades en existencia<p><strong>@Model.TotalUnidades</strong></p></div>
+        <div class="tarjeta">Productos con stock bajo<p><strong>@Model.StockBajo</strong></p></div>
+    </section>
+
+    <section class="formularios">
+        <div class="panel">
+            <h2>Categorías</h2>
+            <form method="post" asp-controller="Inventario" asp-action="AddCategory">
+                <input name="nombre" maxlength="50" placeholder="Nombre de categoría" required />
+                <button type="submit">Agregar categoría</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="tabla">
+        <form class="busqueda" method="get" asp-controller="Inventario" asp-action="Index">
+            <input name="buscar" value="@Model.Buscar" placeholder="Buscar por código, nombre o artista" />
+            <select name="categoria">
+                <option value="">Todas las categorías</option>
+                @foreach (var categoria in Model.Categorias)
+                {
+                    if (Model.CategoriaSeleccionada == categoria.Id)
+                    {
+                        <option value="@categoria.Id" selected>@categoria.Nombre</option>
+                    }
+                    else
+                    {
+                        <option value="@categoria.Id">@categoria.Nombre</option>
+                    }
+                }
+            </select>
+            <button type="submit">Buscar</button>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Código</th><th>Descripcion</th><th>Artista</th><th>Categoría</th>
+                    <th>Precio</th><th>Existencia</th><th>Stock mínimo</th><th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var producto in Model.Productos)
+            {
+                <tr>
+                    <td>@producto.Codigo</td>
+                    <td>@producto.Nombre</td>
+                    <td>@(string.IsNullOrWhiteSpace(producto.Artista) ? "—" : producto.Artista)</td>
+                    <td>@producto.Categoria</td>
+                    <td>@producto.Precio.ToString("C")</td>
+                    <td>@producto.Existencia</td>
+                    <td>@producto.StockMinimo</td>
+                    <td>
+                        <div class="acciones">
+                            <a asp-controller="Inventario" asp-action="Edit" asp-route-id="@producto.Id">Editar</a>
+                            <form method="post" asp-controller="Inventario" asp-action="Delete"
+                                  asp-route-id="@producto.Id"
+                                  onsubmit="return confirm('¿Eliminar este producto?');">
+                                <button class="eliminar" type="submit">Eliminar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+            @if (Model.Productos.Count == 0)
+            {
+                <tr><td colspan="8">No hay productos que coincidan con la búsqueda.</td></tr>
+            }
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

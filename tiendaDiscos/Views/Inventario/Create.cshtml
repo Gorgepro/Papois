@@ -1,0 +1,73 @@
+@model tiendaDiscos.Models.ProductoFormViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(Model.Id == 0 ? "Agregar producto" : "Editar producto") - Papois Vinyl</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { max-width: 760px; margin: 30px auto; padding: 18px; background: #E3DDD3; color: #292e2c; font-family: Arial, sans-serif; }
+        .menu { display: flex; gap: 10px; margin-bottom: 20px; }
+        .menu a, button, .volver { padding: 10px 14px; border: 0; border-radius: 6px; background: #701705; color: white; cursor: pointer; text-decoration: none; font: inherit; }
+        form { display: grid; gap: 14px; padding: 22px; background: white; border: 1px solid #ddd; border-radius: 10px; }
+        label { display: grid; gap: 6px; }
+        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
+        .error { color: #a94442; }
+        @@media (max-width: 600px) { .menu { flex-direction: column; } }
+    </style>
+</head>
+<body>
+    @await Html.PartialAsync("_AdminMenu")
+    <h1>@(Model.Id == 0 ? "Agregar producto" : "Editar producto")</h1>
+    <form method="post" asp-controller="Inventario"
+          asp-action="@(Model.Id == 0 ? "Create" : "Edit")"
+          asp-route-id="@(Model.Id == 0 ? (int?)null : Model.Id)">
+        <div asp-validation-summary="All" class="error"></div>
+        <input asp-for="Id" type="hidden" />
+        <label>Código
+            <input asp-for="Codigo" maxlength="30" required />
+        </label>
+        <label>Nombre del disco
+            <input asp-for="Nombre" maxlength="100" required />
+        </label>
+        <label>Artista
+            <input asp-for="Artista" maxlength="100" />
+        </label>
+        <label>Categoría
+            <select asp-for="IdCategoria" required>
+                <option value="">Selecciona una categoría</option>
+                @foreach (var categoria in Model.Categorias)
+                {
+                    <option value="@categoria.Id">@categoria.Nombre</option>
+                }
+            </select>
+        </label>
+        @if (Model.Categorias.Count == 0)
+        {
+            <p class="error">Primero agrega una categoría desde Inventario.</p>
+        }
+        <label>Precio de venta
+            <input asp-for="Precio" type="number" min="0" step="0.01" required />
+        </label>
+        <label>Existencia inicial
+            <input asp-for="Existencia" type="number" min="0" step="1" required />
+        </label>
+        <label>Stock mínimo
+            <input asp-for="StockMinimo" type="number" min="0" step="1" required />
+        </label>
+        @if (Model.Categorias.Count == 0)
+        {
+            <button type="submit" disabled>Guardar producto</button>
+        }
+        else
+        {
+            <button type="submit">@(Model.Id == 0 ? "Guardar producto" : "Actualizar producto")</button>
+        }
+        <a class="volver" asp-controller="Inventario" asp-action="Index">Volver al inventario</a>
+    </form>
+</body>
+</html>

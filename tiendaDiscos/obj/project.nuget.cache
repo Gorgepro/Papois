@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "gAfq9eFqagc=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\dorad\\source\\repos\\tiendaDiscos\\tiendaDiscos\\tiendaDiscos.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\dorad\\.nuget\\packages\\mysqlconnector\\3.0.0-beta.1\\mysqlconnector.3.0.0-beta.1.nupkg.sha512"
+  ],
+  "logs": []
+}

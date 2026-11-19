@@ -1,0 +1,102 @@
+@model tiendaDiscos.Models.VentasViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Controlar ventas - Papois Vinyl</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 28px; background: #E3DDD3; color: #292e2c; font-family: Arial, sans-serif; }
+        main { max-width: 1100px; margin: auto; }
+        .menu, form { display: flex; align-items: center; gap: 10px; }
+        .menu { margin: 18px 0; }
+        .menu a, button { padding: 10px 14px; border: 0; border-radius: 6px; background: #701705; color: white; cursor: pointer; text-decoration: none; font: inherit; }
+        .menu a:hover, button:hover { background: #501004; }
+        .panel, .tabla { padding: 20px; background: white; border: 1px solid #ddd; border-radius: 10px; }
+        form { align-items: end; flex-wrap: wrap; }
+        label { display: grid; gap: 6px; }
+        select, input { min-width: 220px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
+        .tabla { margin-top: 20px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 650px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+        .alerta { padding: 12px; border-radius: 6px; background: #e8f1eb; }
+        .error { background: #f8e6e5; color: #812c29; }
+        .vacio { color: #666; }
+        @@media (max-width: 650px) {
+            body { padding: 14px; }
+            .menu, form { align-items: stretch; flex-direction: column; }
+            select, input { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Controlar ventas</h1>
+    @await Html.PartialAsync("_AdminMenu")
+    @if (TempData["Mensaje"] is string mensaje)
+    {
+        <p class="alerta">@mensaje</p>
+    }
+    @if (TempData["Error"] is string error)
+    {
+        <p class="alerta error">@error</p>
+    }
+
+    <section class="panel">
+        <h2>Registrar venta</h2>
+        @if (Model.Productos.Count == 0)
+        {
+            <p class="vacio">No hay productos con existencia disponible.</p>
+        }
+        else
+        {
+            <form method="post" asp-controller="Ventas" asp-action="Create">
+                <label>Producto
+                    <select name="idProducto" required>
+                        <option value="">Selecciona un producto</option>
+                        @foreach (var producto in Model.Productos)
+                        {
+                            <option value="@producto.Id">@producto.Nombre</option>
+                        }
+                    </select>
+                </label>
+                <label>Cantidad
+                    <input type="number" name="cantidad" min="1" step="1" value="1" required />
+                </label>
+                <button type="submit">Registrar venta</button>
+            </form>
+            <p>El precio vigente del producto se usa para calcular el total y descontar la existencia.</p>
+        }
+    </section>
+
+    <section class="tabla">
+        <h2>Ventas recientes</h2>
+        <table>
+            <thead>
+                <tr><th>Venta</th><th>Fecha</th><th>Productos (cantidad)</th><th>Unidades</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+            @foreach (var venta in Model.Ventas)
+            {
+                <tr>
+                    <td>#@venta.Id</td>
+                    <td>@venta.Fecha.ToString("g")</td>
+                    <td>@venta.Productos</td>
+                    <td>@venta.Cantidad</td>
+                    <td>@venta.Total.ToString("C")</td>
+                </tr>
+            }
+            @if (Model.Ventas.Count == 0)
+            {
+                <tr><td colspan="5">Todavía no hay ventas registradas.</td></tr>
+            }
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

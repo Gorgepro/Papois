@@ -1,0 +1,190 @@
+@model tiendaDiscos.Models.PedidosViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Controlar pedidos - Papois Vinyl</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 28px; background: #E3DDD3; color: #292e2c; font-family: Arial, sans-serif; }
+        main { max-width: 1150px; margin: auto; }
+        .menu, form { display: flex; align-items: center; gap: 10px; }
+        .menu { margin: 18px 0; }
+        .menu a, button { padding: 10px 14px; border: 0; border-radius: 6px; background: #701705; color: white; cursor: pointer; text-decoration: none; font: inherit; }
+        .menu a:hover, button:hover { background: #501004; }
+        .formularios { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+        .panel, .tabla { padding: 20px; background: white; border: 1px solid #ddd; border-radius: 10px; }
+        form { align-items: stretch; flex-wrap: wrap; }
+        label { display: grid; flex: 1 1 180px; gap: 6px; }
+        input, select, textarea { min-width: 0; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
+        textarea { resize: vertical; }
+        .tabla { margin-top: 20px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 850px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+        .proveedor-form { flex-wrap: nowrap; }
+        .proveedor-form input { width: 135px; }
+        .alerta { padding: 12px; border-radius: 6px; background: #e8f1eb; }
+        .error { background: #f8e6e5; color: #812c29; }
+        .vacio { color: #666; }
+        @@media (max-width: 800px) {
+            body { padding: 14px; }
+            .formularios { grid-template-columns: 1fr; }
+            .menu, form { align-items: stretch; flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Controlar pedidos</h1>
+    @await Html.PartialAsync("_AdminMenu")
+    @if (TempData["Mensaje"] is string mensaje)
+    {
+        <p class="alerta">@mensaje</p>
+    }
+    @if (TempData["Error"] is string error)
+    {
+        <p class="alerta error">@error</p>
+    }
+
+    <div class="formularios">
+        <section class="panel">
+            <h2>Registrar entrada de mercancía</h2>
+            @if (Model.Proveedores.Count == 0 || Model.Productos.Count == 0)
+            {
+                <p class="vacio">
+                    @if (Model.Proveedores.Count == 0)
+                    {
+                        <span>Agrega un proveedor antes de registrar una entrada. </span>
+                    }
+                    @if (Model.Productos.Count == 0)
+                    {
+                        <span>Agrega un producto desde Inventario.</span>
+                    }
+                </p>
+            }
+            else
+            {
+                <form method="post" asp-controller="Pedidos" asp-action="Create">
+                    <label>Proveedor
+                        <select name="idProveedor" required>
+                            <option value="">Selecciona un proveedor</option>
+                            @foreach (var proveedor in Model.Proveedores)
+                            {
+                                <option value="@proveedor.Id">@proveedor.Nombre</option>
+                            }
+                        </select>
+                    </label>
+                    <label>Producto recibido
+                        <select name="idProducto" required>
+                            <option value="">Selecciona un producto</option>
+                            @foreach (var producto in Model.Productos)
+                            {
+                                <option value="@producto.Id">@producto.Nombre</option>
+                            }
+                        </select>
+                    </label>
+                    <label>Cantidad recibida
+                        <input type="number" name="cantidad" min="1" step="1" value="1" required />
+                    </label>
+                    <label>Precio de compra por unidad
+                        <input type="number" name="precioCompra" min="0" step="0.01" required />
+                    </label>
+                    <label>Observaciones
+                        <textarea name="observaciones" maxlength="250" rows="2"></textarea>
+                    </label>
+                    <button type="submit">Registrar entrada</button>
+                </form>
+                <p>La entrada suma las unidades recibidas a la existencia del producto.</p>
+            }
+        </section>
+
+        <section class="panel">
+            <h2>Agregar proveedor</h2>
+            <form method="post" asp-controller="Pedidos" asp-action="CreateSupplier">
+                <label>Nombre
+                    <input name="nombre" maxlength="100" required />
+                </label>
+                <label>Teléfono
+                    <input name="telefono" maxlength="20" />
+                </label>
+                <label>Correo
+                    <input type="email" name="correo" maxlength="100" />
+                </label>
+                <label>Dirección
+                    <input name="direccion" maxlength="200" />
+                </label>
+                <button type="submit">Guardar proveedor</button>
+            </form>
+        </section>
+    </div>
+
+    <section class="tabla">
+        <h2>Administrar proveedores</h2>
+        <table>
+            <thead>
+                <tr><th>Nombre</th><th>Teléfono</th><th>Correo</th><th>Dirección</th><th>Acciones</th></tr>
+            </thead>
+            <tbody>
+            @foreach (var proveedor in Model.ProveedoresDetalle)
+            {
+                <tr>
+                    <td colspan="4">
+                        <form class="proveedor-form" method="post" asp-controller="Pedidos"
+                              asp-action="UpdateSupplier" asp-route-id="@proveedor.Id">
+                            <input name="nombre" value="@proveedor.Nombre" maxlength="100" aria-label="Nombre del proveedor" required />
+                            <input name="telefono" value="@proveedor.Telefono" maxlength="20" aria-label="Teléfono" />
+                            <input type="email" name="correo" value="@proveedor.Correo" maxlength="100" aria-label="Correo" />
+                            <input name="direccion" value="@proveedor.Direccion" maxlength="200" aria-label="Dirección" />
+                            <button type="submit">Actualizar</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="post" asp-controller="Pedidos" asp-action="DeleteSupplier"
+                              asp-route-id="@proveedor.Id"
+                              onsubmit="return confirm('¿Eliminar este proveedor?');">
+                            <button class="eliminar" type="submit">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            @if (Model.ProveedoresDetalle.Count == 0)
+            {
+                <tr><td colspan="5">Todavía no hay proveedores registrados.</td></tr>
+            }
+            </tbody>
+        </table>
+    </section>
+
+    <section class="tabla">
+        <h2>Entradas recientes</h2>
+        <table>
+            <thead>
+                <tr><th>Entrada</th><th>Fecha</th><th>Proveedor</th><th>Productos</th><th>Unidades</th><th>Total</th><th>Observaciones</th></tr>
+            </thead>
+            <tbody>
+            @foreach (var entrada in Model.Entradas)
+            {
+                <tr>
+                    <td>#@entrada.Id</td>
+                    <td>@entrada.Fecha.ToString("g")</td>
+                    <td>@entrada.Proveedor</td>
+                    <td>@entrada.Productos</td>
+                    <td>@entrada.Cantidad</td>
+                    <td>@entrada.Total.ToString("C")</td>
+                    <td>@(string.IsNullOrWhiteSpace(entrada.Observaciones) ? "—" : entrada.Observaciones)</td>
+                </tr>
+            }
+            @if (Model.Entradas.Count == 0)
+            {
+                <tr><td colspan="7">Todavía no hay entradas registradas.</td></tr>
+            }
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>
